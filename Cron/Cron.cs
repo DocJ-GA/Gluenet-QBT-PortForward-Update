@@ -11,26 +11,27 @@ using System.Reflection.Emit;
 
 namespace Cron
 {
-    internal class Cron
+    public class Cron
     {
         public DateTime StartTime { get; set; }
 
         public DateTime StopTime { get; set; }
 
-        public string? LogFile { get; private set; }
+		public Configuration? Configs { get; private set; }
 
-        public Cron()
+        public Cron(Configuration? configs)
         {
+			Configs = configs;
         }
 
 
-        public void Start(string message = "Starting Cronicology.")
+        public void Start(string message = "Starting App.")
         {
             StartTime = DateTime.Now;
             Log(message);
 
             // Lets see if the process is running.
-            if (File.Exists(Config.PSF))
+            if (Configs != null && File.Exists(Configs.PSF))
             {
                 // The file exists, it may still be running.
                 var status = File.ReadAllLines(Config.PSF);
@@ -45,10 +46,11 @@ namespace Cron
 
             // Updating the process status file.
             Log("Writing the process status file at '" + Config.PSF + "'.", system: false);
-            File.WriteAllText(Config.PSF, "started");
+            if (Configs != null)
+				File.WriteAllText(Configs.PSF, "started");
 
             // Starting the log.
-            if (File.Exists(Config.Log))
+            if (Configs != null && File.Exists(Configs.Log))
             {
                 // Log file exists. Checking size.
                 var info = new FileInfo(Config.Log);
@@ -57,11 +59,11 @@ namespace Cron
                     // Log file is greater than 10 MiB so it needs rotated.
                     Log("Log file greater than 10 MiB, rotating it.");
                     Log(DateTime.Now.ToString("s") + ": Rotating log file", system: false);
-                    File.Move(Config.Log, Config.LogPath + "/cronicology.old." + DateTime.Now.ToString("s"));
-                    File.Create(Config.Log);
+                    File.Move(Configs.Log, Config.LogPath + "/cronicology.old." + DateTime.Now.ToString("s"));
+                    File.Create(Configs.Log);
                     Log(DateTime.Now.ToString("s") + ": Log file created.", system: false);
 
-                    var oldLogs = Directory.GetFiles(Config.LogPath, "cronicology.old.*").Select(p => Path.GetFileName(p)).ToArray();
+                    var oldLogs = Directory.GetFiles(Configs.LogPath, "cronicology.old.*").Select(p => Path.GetFileName(p)).ToArray();
                     if (oldLogs.Length > 5)
                     {
                         // We got too many logs, we will delete oldest to newest until we have five.
@@ -75,7 +77,7 @@ namespace Cron
 
                         foreach (var entry in orderedList.Take(orderedList.Count - 5))
                         {
-                            File.Delete(Config.LogPath + entry.Value);
+                            File.Delete(Configs.LogPath + entry.Value);
                         }
                     }
                 }
@@ -84,8 +86,11 @@ namespace Cron
             else
             {
                 // The log file doesn't exists. Creating it.
-                File.Create(Config.Log);
-                File.AppendAllText(Config.Log, DateTime.Now.ToString("s") + ": Log file created.");
+				if (Configs != null)
+				{
+	                File.Create(Configs.Log);
+	                File.AppendAllText(Configs.Log, DateTime.Now.ToString("s") + ": Log file created.");
+				}
             }
         }
 
@@ -93,7 +98,8 @@ namespace Cron
         public void Fail(string message = "Ending Cronicology in a failed state.")
         {
             Log(message, Syslog.Level.Err);
-            File.WriteAllText(Config.PSF, "failed");
+			if (Configs != null)
+            	File.WriteAllText(Configs.PSF, "failed");
             RunTime();
         }
 
@@ -102,7 +108,8 @@ namespace Cron
         {
             Log("Writing complete to PSF file.", system: false);
             Log(message);
-            File.WriteAllText(Config.PSF, "complete");
+            if (Configs != null)
+				File.WriteAllText(Configs.PSF, "complete");
             RunTime();
 
         }
@@ -120,7 +127,8 @@ namespace Cron
             if (system)
                 Syslog.Write(message, level, identity);
 
-            File.AppendAllText(Config.Log, DateTime.Now.ToString("s") + "[" + level + "]: " + message + "\n");
+			if (Configs != null)
+            	File.AppendAllText(Configs.Log, DateTime.Now.ToString("s") + "[" + level + "]: " + message + "\n");
         }
 
         public void LogInfo(string message)
