@@ -1,0 +1,25 @@
+#################################################
+# General configuration for glue-qbt-porter.
+# Every possible configuration option is in this 
+# file. View the readme file for valid options.
+#################################################
+
+debug = false #Whether or not to write debug messages to the log.
+
+# Logs
+log_path = "/var/log/glue-qbt-porter/" #The path of the log directory.  Make sure it exists and permissions are ok
+log_name = "qbt.log"
+log_max_size = 10	#Max file size in megabytes.
+log_max_age = 5 #Max amount of old log files to hold.
+
+# Cron
+pid = "/opt/pid/glue-qbt-porter.pid" #Make sure the directory exists and permissions are ok.
+
+
+#################################################
+# Here is the list of backups you want to
+#
+#################################################
+
+glue_uri = "http://localhost:8000"
+qbt_uri = "http://localhost:8080"

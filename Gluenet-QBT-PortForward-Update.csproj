@@ -6,6 +6,26 @@
     <RootNamespace>Gluenet_QBT_PortForward_Update</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Company>JacksonServer</Company>
+    <Product>Gluetun Qbittorrent Port Sync</Product>
+    <Description>Syncs the port between gluetun portforwarding vpn and the qBittorrent server.</Description>
+    <Copyright>2024 Jackson Server All rights Reserved</Copyright>
+    <PackageId>$(AssemblyName)</PackageId>
+    <Title>Gluetun Qbittorrent Port Sync</Title>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="qBittorrent\**" />
+    <EmbeddedResource Remove="qBittorrent\**" />
+    <None Remove="qBittorrent\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CronixUtility" Version="1.0.1" />
+    <PackageReference Include="GluetunUtility" Version="1.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="qBittorrent" Version="0.8.0" />
+    <PackageReference Include="Tomlyn" Version="0.17.0" />
+  </ItemGroup>
 
 </Project>
